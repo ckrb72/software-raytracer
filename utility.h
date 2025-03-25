@@ -39,6 +39,15 @@ namespace raytracer
         if(dot(on_sphere, normal) > 0.0) return on_sphere;
         else return -on_sphere;
     }
+
+    // convert linear color to gamma color given a gamma factor (i.e. 2.2)
+    inline float linear_to_gamma(float linear_component, float gamma)
+    {
+        if(linear_component > 0)
+            return pow(linear_component, 1.0f / gamma);
+
+        return 0;
+    }
 }
 
 #include "interval.h"

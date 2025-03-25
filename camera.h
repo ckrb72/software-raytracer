@@ -38,12 +38,20 @@ namespace raytracer
         {
             if (depth <= 0) return glm::vec3(0.0, 0.0, 0.0);
 
-            raytracer::hit_record rec;
-            if(world.hit(r, raytracer::interval(0.001, raytracer::INFTY), rec))
+            hit_record rec;
+            if(world.hit(r, interval(0.001, INFTY), rec))
             {
-                glm::vec3 direction = random_vec_on_hemisphere(rec.normal);
+                // get a random vector on the hemisphere around the point we hit (defined by its normal)
+                // essentially simulating a random reflection of the light off the object's surface
+                //glm::vec3 direction = random_vec_on_hemisphere(rec.normal);
+                
+                // Lambertian diffuse (look into this more because i dont even know)
+                glm::vec3 direction = rec.normal + random_unit_vector();
+
+                // cast a ray in the direction of the random vector we just generated, returning half it's light value
                 return 0.5f * ray_color(ray(rec.point, direction), depth - 1, world);
 
+                // For normals: 
                 // Convert [-1, 1] to [0, 1] so we can display it as a color
                 //return 0.5f * (rec.normal + glm::vec3(1.0f, 1.0f, 1.0f));
             }
@@ -56,9 +64,9 @@ namespace raytracer
 
         void write_color(std::ostream& out, const glm::vec3& pixel_color)
         {
-            float r = pixel_color.r;
-            float g = pixel_color.g;
-            float b = pixel_color.b;
+            float r = linear_to_gamma(pixel_color.r, 2.0);
+            float g = linear_to_gamma(pixel_color.g, 2.0);
+            float b = linear_to_gamma(pixel_color.b, 2.0);
         
             static interval intensity(0.0, 0.999);
 
