@@ -34,13 +34,18 @@ namespace raytracer
             pixel00_loc = viewport_upper_left + 0.5f * (pixel_delta_u + pixel_delta_v);
         }
 
-        glm::vec3 ray_color(const ray& r, const hittable& world) const
+        glm::vec3 ray_color(const ray& r, int depth, const hittable& world) const
         {
+            if (depth <= 0) return glm::vec3(0.0, 0.0, 0.0);
+
             raytracer::hit_record rec;
-            if(world.hit(r, raytracer::interval(0, raytracer::INFTY), rec))
+            if(world.hit(r, raytracer::interval(0.001, raytracer::INFTY), rec))
             {
+                glm::vec3 direction = random_vec_on_hemisphere(rec.normal);
+                return 0.5f * ray_color(ray(rec.point, direction), depth - 1, world);
+
                 // Convert [-1, 1] to [0, 1] so we can display it as a color
-                return 0.5f * (rec.normal + glm::vec3(1.0f, 1.0f, 1.0f));
+                //return 0.5f * (rec.normal + glm::vec3(1.0f, 1.0f, 1.0f));
             }
         
             glm::vec3 unit_direction = glm::normalize(r.direction());
@@ -84,6 +89,7 @@ namespace raytracer
         double aspect_ratio = 1.0;
         int image_width = 100;
         int samples_per_pixel = 10;
+        int max_depth = 10;
 
         void render(const hittable& world)
         {
@@ -96,11 +102,10 @@ namespace raytracer
                 for (int i = 0; i < image_width; i++) {
 
                     glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.0f);
-
                     for(int sample = 0; sample < samples_per_pixel; sample++)
                     {
                         ray r = get_ray(i, j);
-                        pixel_color += ray_color(r, world);
+                        pixel_color += ray_color(r, max_depth, world);
                     }
 
                     pixel_color /= (float)samples_per_pixel;
