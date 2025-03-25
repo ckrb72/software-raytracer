@@ -1,14 +1,10 @@
-#include <iostream>
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/vec3.hpp" // glm::vec3
-#include "glm/vec4.hpp" // glm::vec4
-#include "glm/mat4x4.hpp" // glm::mat4
-#include "glm/ext/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale
-#include "glm/gtx/norm.hpp"
-#include "ray.h"
+#include "utility.h"
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
 void write_color(std::ostream& out, const glm::vec3& pixel_color);
-glm::vec3 ray_color(const raytracer::ray& r);
+glm::vec3 ray_color(const raytracer::ray& r, const raytracer::hittable& world);
 
 int main() {
 
@@ -32,6 +28,10 @@ int main() {
     glm::vec3 viewport_upper_left = camera_center - glm::vec3(0.0, 0.0, focal_length) - viewport_u / 2.0f - viewport_v / 2.0f;
     glm::vec3 pixel00_loc = viewport_upper_left + 0.5f * (pixel_delta_u + pixel_delta_v);
 
+    // World
+    raytracer::hittable_list world;
+    world.add(std::make_shared<raytracer::sphere>(glm::vec3(0.0, 0.0, -1.0), 0.5));
+    world.add(std::make_shared<raytracer::sphere>(glm::vec3(0.0, -100.5, -1.0), 100));
 
     // Render
 
@@ -44,8 +44,8 @@ int main() {
             glm::vec3 ray_direction = pixel_center - camera_center;
             raytracer::ray r(camera_center, ray_direction);
     
-
-            write_color(std::cout, ray_color(r));
+            glm::vec3 pixel_color = ray_color(r, world);
+            write_color(std::cout, pixel_color);
         }
     }
     std::clog << "\rDone.                       \n";
@@ -64,35 +64,13 @@ void write_color(std::ostream& out, const glm::vec3& pixel_color)
     out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
 }
 
-float hit_sphere(const glm::vec3& center, float radius, const raytracer::ray& r)
+glm::vec3 ray_color(const raytracer::ray& r, const raytracer::hittable& world)
 {
-    glm::vec3 oc = center - r.origin();
-    float a = glm::length2(r.direction());
-    float h = glm::dot(r.direction(), oc);
-    float c = glm::length2(oc) - radius * radius;
-    float discriminant = h*h - a*c;
-    if (discriminant < 0)
+    raytracer::hit_record rec;
+    if(world.hit(r, 0, raytracer::INFTY, rec))
     {
-        return -1.0;
-    }
-    else
-    {
-        // return the root of the quadratic formula
-        return (h - std::sqrt(discriminant)) / a;
-    }
-}
-
-glm::vec3 ray_color(const raytracer::ray& r)
-{
-    glm::vec3 sphere_center = glm::vec3(0.0, 0.0, -1.0);
-    float t = hit_sphere(sphere_center, 0.5, r);
-    if (t > 0.0)
-    {
-        // get normal (position the ray hits minus position of the sphere center)
-        glm::vec3 n = glm::normalize(r.at(t) - sphere_center);
-
-        // Convert from [-1, 1] to [0, 1]
-        return 0.5f * glm::vec3(n.x + 1.0f, n.y + 1.0f, n.z + 1.0f);
+        // Convert [-1, 1] to [0, 1] so we can display it as a color
+        return 0.5f * (rec.normal + glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
     glm::vec3 unit_direction = glm::normalize(r.direction());
