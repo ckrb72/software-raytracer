@@ -13,6 +13,12 @@ namespace raytracer
             float size() const { return max - min; }
             bool contains(float x) const { return (x >= min && x <= max); }
             bool surrounds(float x) const { return (x > min && x < max); }
+            float clamp(float x)
+            {
+                if(x < min) return min;
+                if(x > max) return max;
+                return x;
+            }
 
             static const interval empty, universe;
 

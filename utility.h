@@ -14,6 +14,8 @@ namespace raytracer
     const float PI = 3.1415926535897932385;
 
     inline float degress_to_radians(float degrees) { return (degrees * PI) / 180.0;}
+    inline float random_float() { return std::rand() / (RAND_MAX + 1.0); }
+    inline float random_float(float min, float max) { return min + (max - min) * random_float(); }
 }
 
 #include "interval.h"

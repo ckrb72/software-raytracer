@@ -55,11 +55,27 @@ namespace raytracer
             float g = pixel_color.g;
             float b = pixel_color.b;
         
-            int rbyte = (int)(255.999 * r);
-            int gbyte = (int)(255.999 * g);
-            int bbyte = (int)(255.999 * b);
+            static interval intensity(0.0, 0.999);
+
+            int rbyte = (int)(256 * intensity.clamp(r));
+            int gbyte = (int)(256 * intensity.clamp(g));
+            int bbyte = (int)(256 * intensity.clamp(b));
         
             out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
+        }
+
+        ray get_ray(int i, int j) const
+        {
+            glm::vec3 offset = sample_square();
+            glm::vec3 pixel_sample = pixel00_loc + (((float)i + offset.x) * pixel_delta_u) + (((float)j + offset.y) * pixel_delta_v);
+            glm::vec3 ray_origin = camera_center;
+            glm::vec3 ray_direction = pixel_sample - ray_origin;
+            return ray(ray_origin, ray_direction);
+        }
+
+        glm::vec3 sample_square() const
+        {
+            return glm::vec3(random_float() - 0.5f, random_float() - 0.5f, 0.0f);
         }
 
 
@@ -67,6 +83,7 @@ namespace raytracer
 
         double aspect_ratio = 1.0;
         int image_width = 100;
+        int samples_per_pixel = 10;
 
         void render(const hittable& world)
         {
@@ -77,11 +94,16 @@ namespace raytracer
             for (int j = 0; j < image_height; j++) {
                 std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
                 for (int i = 0; i < image_width; i++) {
-                    glm::vec3 pixel_center = pixel00_loc + ((float)i * pixel_delta_u) + ((float)j * pixel_delta_v);
-                    glm::vec3 ray_direction = pixel_center - camera_center;
-                    raytracer::ray r(camera_center, ray_direction);
-            
-                    glm::vec3 pixel_color = ray_color(r, world);
+
+                    glm::vec3 pixel_color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+                    for(int sample = 0; sample < samples_per_pixel; sample++)
+                    {
+                        ray r = get_ray(i, j);
+                        pixel_color += ray_color(r, world);
+                    }
+
+                    pixel_color /= (float)samples_per_pixel;
                     write_color(std::cout, pixel_color);
                 }
             }
