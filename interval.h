@@ -5,14 +5,14 @@ namespace raytracer
     class interval
     {
         public:
-            float m_min, m_max;
+            float min, max;
 
-            interval(): m_min(-INFTY), m_max(INFTY) {}
-            interval(float min, float max): m_min(min), m_max(max) {}
+            interval(): min(-INFTY), max(INFTY) {}
+            interval(float min, float max): min(min), max(max) {}
 
-            float size() const { return m_max - m_min; }
-            bool contains(float x) const { return (x >= m_min && x <= m_max); }
-            bool surrounds(float x) const { return (x > m_min && x < m_max); }
+            float size() const { return max - min; }
+            bool contains(float x) const { return (x >= min && x <= max); }
+            bool surrounds(float x) const { return (x > min && x < max); }
 
             static const interval empty, universe;
 

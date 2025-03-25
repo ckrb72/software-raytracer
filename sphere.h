@@ -12,7 +12,7 @@ namespace raytracer
         public:
             sphere(const glm::vec3& center, float radius) : m_center(center), m_radius(std::fmax(0, radius)) {}
 
-            bool hit(const ray& r, float ray_tmin, float ray_tmax, hit_record& rec) const override
+            bool hit(const ray& r, interval ray_t, hit_record& rec) const override
             {
                 // Quadratic formula
                 glm::vec3 oc = m_center - r.origin();
@@ -28,14 +28,12 @@ namespace raytracer
                 // Find root within (ray_tmin, ray_tmax)
                 float sqrtd = std::sqrt(discriminant);
                 float root = (h - sqrtd) / a;
-                if(root <= ray_tmin || root >= ray_tmax)
+                if(!ray_t.surrounds(root))
                 {
                     root = (h + sqrtd) / a;
-                    if(root <= ray_tmin || root >= ray_tmax)
-                    {
+                    if(!ray_t.surrounds(root))
                         // If no real roots within range (ray_tmin, ray_tmax) then no hit
                         return false;
-                    }
                 }
 
                 rec.t = root;
