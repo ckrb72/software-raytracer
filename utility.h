@@ -48,6 +48,12 @@ namespace raytracer
 
         return 0;
     }
+
+    inline bool vec_near_zero(const glm::vec3& vec) 
+    {
+        float s = 1e-8;
+        return (std::fabs(vec.x) < s) && (std::fabs(vec.y) < s) && (std::fabs(vec.z) < s);
+    }
 }
 
 #include "interval.h"

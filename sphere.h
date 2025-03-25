@@ -8,9 +8,13 @@ namespace raytracer
         private:
             glm::vec3 m_center;
             float m_radius;
+            std::shared_ptr<material> mat;
 
         public:
-            sphere(const glm::vec3& center, float radius) : m_center(center), m_radius(std::fmax(0, radius)) {}
+            sphere(const glm::vec3& center, float radius) : m_center(center), m_radius(std::fmax(0, radius)) 
+            {
+                
+            }
 
             bool hit(const ray& r, interval ray_t, hit_record& rec) const override
             {
@@ -40,6 +44,7 @@ namespace raytracer
                 rec.point = r.at(root);
                 glm::vec3 outward_normal = (rec.point - m_center) / m_radius;
                 rec.set_face_normal(r, outward_normal);
+                rec.mat = mat;
 
                 return true;
             }

@@ -1,8 +1,10 @@
 #pragma once
 #include "utility.h"
 
+
 namespace raytracer
 {
+    class material;
 
     struct hit_record
     {
@@ -10,6 +12,7 @@ namespace raytracer
         glm::vec3 normal;
         float t;
         bool front_face;
+        std::shared_ptr<material> mat;
 
         // Set face normal so it is always pointing against the ray direction
         void set_face_normal(const ray& r, const glm::vec3& outward_normal)
