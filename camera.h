@@ -1,5 +1,6 @@
 #pragma once
 #include "hittable.h"
+#include "material.h"
 #include "utility.h"
 
 namespace raytracer
@@ -46,10 +47,15 @@ namespace raytracer
                 //glm::vec3 direction = random_vec_on_hemisphere(rec.normal);
                 
                 // Lambertian diffuse (look into this more because i dont even know)
-                glm::vec3 direction = rec.normal + random_unit_vector();
+                //glm::vec3 direction = rec.normal + random_unit_vector();
 
                 // cast a ray in the direction of the random vector we just generated, returning half it's light value
-                return 0.5f * ray_color(ray(rec.point, direction), depth - 1, world);
+                //return 0.5f * ray_color(ray(rec.point, direction), depth - 1, world);
+
+                ray scattered;
+                glm::vec3 attenuation;
+                if(rec.mat->scatter(r, rec, attenuation, scattered))
+                    return attenuation * ray_color(scattered, depth - 1, world);
 
                 // For normals: 
                 // Convert [-1, 1] to [0, 1] so we can display it as a color

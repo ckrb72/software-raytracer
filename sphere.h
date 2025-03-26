@@ -8,10 +8,10 @@ namespace raytracer
         private:
             glm::vec3 m_center;
             float m_radius;
-            std::shared_ptr<material> mat;
+            std::shared_ptr<material> m_mat;
 
         public:
-            sphere(const glm::vec3& center, float radius) : m_center(center), m_radius(std::fmax(0, radius)) 
+            sphere(const glm::vec3& center, float radius, std::shared_ptr<material> mat) : m_center(center), m_radius(std::fmax(0, radius)), m_mat(mat)
             {
                 
             }
@@ -44,7 +44,7 @@ namespace raytracer
                 rec.point = r.at(root);
                 glm::vec3 outward_normal = (rec.point - m_center) / m_radius;
                 rec.set_face_normal(r, outward_normal);
-                rec.mat = mat;
+                rec.mat = m_mat;
 
                 return true;
             }

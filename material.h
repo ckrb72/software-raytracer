@@ -29,4 +29,23 @@ namespace raytracer
                 return true;
             }
     };
+
+
+    class metal : public material
+    {
+        private:
+            glm::vec3 albedo;
+
+        public:
+        metal(const glm::vec3& albedo): albedo(albedo) {}
+
+        bool scatter(const ray& r_in, const hit_record& rec, glm::vec3& attenuation, ray& scattered) const override
+        {
+            glm::vec3 reflected = glm::reflect(r_in.direction(), rec.normal);
+            scattered = ray(rec.point, reflected);
+            attenuation = albedo;
+            return true;
+        }
+
+    };
 }
