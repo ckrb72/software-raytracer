@@ -27,7 +27,10 @@ int main() {
     camera.image_width = 400;
     camera.samples_per_pixel = 100;
     camera.max_depth = 50;
-    camera.vfov = 90.0f;
+    camera.vfov = 20.0f;
+    camera.look_from = glm::vec3(-2.0f, 2.0f, 1.0f);
+    camera.look_at = glm::vec3(0.0f, 0.0f, -1.0f);
+    camera.vup = glm::vec3(0.0f, 1.0f, 0.0f);
 
     // Render
     camera.render(world);

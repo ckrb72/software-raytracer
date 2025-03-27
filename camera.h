@@ -13,27 +13,32 @@ namespace raytracer
         glm::vec3 pixel00_loc;
         glm::vec3 pixel_delta_u;
         glm::vec3 pixel_delta_v;
+        glm::vec3 u, v, w;
 
         void initialize()
         {
             image_height = (int)(image_width  / aspect_ratio);
             image_height = image_height < 1.0 ? 1.0 : image_height;
 
-            camera_center = glm::vec3(0.0, 0.0, 0.0);
+            camera_center = look_from;
         
-            float focal_length = 1.0;
+            float focal_length = glm::length(look_from - look_at);
             float theta = degrees_to_radians(vfov);
             float h = tan(theta / 2.0);
             float viewport_height = 2.0 * h * focal_length;
             float viewport_width = viewport_height * ((float)image_width / (float)image_height);
+
+            w = glm::normalize(look_from - look_at);
+            u = glm::normalize(glm::cross(vup, w));
+            v = glm::normalize(glm::cross(w, u));
         
-            glm::vec3 viewport_u = glm::vec3(viewport_width, 0.0, 0.0);
-            glm::vec3 viewport_v = glm::vec3(0.0, -viewport_height, 0.0);
+            glm::vec3 viewport_u = viewport_width * u;
+            glm::vec3 viewport_v = viewport_height * -v;
         
             pixel_delta_u = viewport_u / (float)image_width;
             pixel_delta_v = viewport_v / (float)image_height;
         
-            glm::vec3 viewport_upper_left = camera_center - glm::vec3(0.0, 0.0, focal_length) - viewport_u / 2.0f - viewport_v / 2.0f;
+            glm::vec3 viewport_upper_left = camera_center - (focal_length * w) - viewport_u / 2.0f - viewport_v / 2.0f;
             pixel00_loc = viewport_upper_left + 0.5f * (pixel_delta_u + pixel_delta_v);
         }
 
@@ -107,6 +112,9 @@ namespace raytracer
         int samples_per_pixel = 10;
         int max_depth = 10;
         float vfov = 90.0f;
+        glm::vec3 look_from = glm::vec3(0.0, 0.0, 0.0);
+        glm::vec3 look_at = glm::vec3(0.0, 0.0, -1.0);
+        glm::vec3 vup = glm::vec3(0.0, 1.0, 0.0);
 
         void render(const hittable& world)
         {
