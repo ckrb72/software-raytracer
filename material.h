@@ -55,6 +55,13 @@ namespace raytracer
         private:
             float refraction_index;
 
+            static float reflectance(float cosine, float refraction_index)
+            {
+                float r0 = (1 - refraction_index) / (1 + refraction_index);
+                r0 = r0 * r0;
+                return r0 + (1-r0)*std::pow((1-cosine), 5);
+            }
+
         public:
 
             dielectric(float refraction_index): refraction_index(refraction_index) {}
@@ -71,7 +78,7 @@ namespace raytracer
 
                 glm::vec3 direction;
 
-                if(ri * sin_theta > 1.0)
+                if(ri * sin_theta > 1.0 || reflectance(cos_theta, ri) > random_float())
                 {
                     direction = glm::reflect(unit_direction, rec.normal);
                 }

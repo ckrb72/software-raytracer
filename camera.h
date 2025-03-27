@@ -22,7 +22,9 @@ namespace raytracer
             camera_center = glm::vec3(0.0, 0.0, 0.0);
         
             float focal_length = 1.0;
-            float viewport_height = 2.0;
+            float theta = degrees_to_radians(vfov);
+            float h = tan(theta / 2.0);
+            float viewport_height = 2.0 * h * focal_length;
             float viewport_width = viewport_height * ((float)image_width / (float)image_height);
         
             glm::vec3 viewport_u = glm::vec3(viewport_width, 0.0, 0.0);
@@ -104,6 +106,7 @@ namespace raytracer
         int image_width = 100;
         int samples_per_pixel = 10;
         int max_depth = 10;
+        float vfov = 90.0f;
 
         void render(const hittable& world)
         {
