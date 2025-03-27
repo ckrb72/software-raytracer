@@ -31,6 +31,8 @@ int main() {
     camera.look_from = glm::vec3(-2.0f, 2.0f, 1.0f);
     camera.look_at = glm::vec3(0.0f, 0.0f, -1.0f);
     camera.vup = glm::vec3(0.0f, 1.0f, 0.0f);
+    camera.defocus_angle = 10.0f;
+    camera.focus_dist = 3.4;
 
     // Render
     camera.render(world);

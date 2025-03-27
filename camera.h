@@ -14,6 +14,8 @@ namespace raytracer
         glm::vec3 pixel_delta_u;
         glm::vec3 pixel_delta_v;
         glm::vec3 u, v, w;
+        glm::vec3 defocus_disk_u, defocus_disk_v;
+
 
         void initialize()
         {
@@ -22,10 +24,10 @@ namespace raytracer
 
             camera_center = look_from;
         
-            float focal_length = glm::length(look_from - look_at);
+            //float focal_length = glm::length(look_from - look_at);
             float theta = degrees_to_radians(vfov);
             float h = tan(theta / 2.0);
-            float viewport_height = 2.0 * h * focal_length;
+            float viewport_height = 2.0 * h * focus_dist;
             float viewport_width = viewport_height * ((float)image_width / (float)image_height);
 
             w = glm::normalize(look_from - look_at);
@@ -38,8 +40,12 @@ namespace raytracer
             pixel_delta_u = viewport_u / (float)image_width;
             pixel_delta_v = viewport_v / (float)image_height;
         
-            glm::vec3 viewport_upper_left = camera_center - (focal_length * w) - viewport_u / 2.0f - viewport_v / 2.0f;
+            glm::vec3 viewport_upper_left = camera_center - (focus_dist * w) - viewport_u / 2.0f - viewport_v / 2.0f;
             pixel00_loc = viewport_upper_left + 0.5f * (pixel_delta_u + pixel_delta_v);
+
+            float defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2.0f));
+            defocus_disk_u = u * defocus_radius;
+            defocus_disk_v = v * defocus_radius;
         }
 
         glm::vec3 ray_color(const ray& r, int depth, const hittable& world) const
@@ -94,9 +100,16 @@ namespace raytracer
         {
             glm::vec3 offset = sample_square();
             glm::vec3 pixel_sample = pixel00_loc + (((float)i + offset.x) * pixel_delta_u) + (((float)j + offset.y) * pixel_delta_v);
-            glm::vec3 ray_origin = camera_center;
+            glm::vec3 ray_origin = (defocus_angle < 0) ? camera_center : defocus_disk_sample();
+
             glm::vec3 ray_direction = pixel_sample - ray_origin;
             return ray(ray_origin, ray_direction);
+        }
+
+        glm::vec3 defocus_disk_sample() const
+        {
+            glm::vec3 p = random_unit_disk();
+            return camera_center + (p.x * defocus_disk_u) + (p.y * defocus_disk_v);
         }
 
         glm::vec3 sample_square() const
@@ -115,6 +128,8 @@ namespace raytracer
         glm::vec3 look_from = glm::vec3(0.0, 0.0, 0.0);
         glm::vec3 look_at = glm::vec3(0.0, 0.0, -1.0);
         glm::vec3 vup = glm::vec3(0.0, 1.0, 0.0);
+        float defocus_angle = 0.0f;
+        float focus_dist = 10.0f;
 
         void render(const hittable& world)
         {

@@ -33,6 +33,18 @@ namespace raytracer
         }
     }
 
+    inline glm::vec3 random_unit_disk()
+    {
+        while(true)
+        {
+            glm::vec3 p = glm::vec3(random_float(-1, 1), random_float(-1, 1), 0.0);
+            if(glm::length2(p) < 1)
+            {
+                return p;
+            }
+        }
+    }
+
     inline glm::vec3 random_vec_on_hemisphere(const glm::vec3& normal)
     {
         glm::vec3 on_sphere = random_unit_vector();
